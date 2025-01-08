@@ -1,51 +1,38 @@
 import express, {Request, Response} from 'express'
+import {config} from 'dotenv'
+import {setUpCategoryHexagon, setUpCategoryModule} from "./modules/category";
+import {sequelize} from "./share/component/sequelize";
 
-const app = express()
+config();
 
-const port = 3000
+(async () => {
+    try {
+        await sequelize.authenticate();
+        console.log('Connection established');
+        
+        
+        const app = express();
+        const port = process.env.PORT || 3000;
+        
+        app.use(express.json());
+        
+        app.get('/', (req: Request, res: Response) => {
+            res.send("Hello world");
+        });
+        
+        app.use('/v1', setUpCategoryHexagon(sequelize));
+        
+        await sequelize.sync({force: false});
+        console.log('Tables in database synced successfully.');
+        
+        
+        app.listen(port, () => {
+            console.log(`Server running at port ${port}`);
+        });
+    } catch (error) {
+        console.error('Failed to start the server:', error);
+        process.exit(1);
+    }
+})();
 
-app.get('/', (req: Request, res: Response) => {
-    res.send("Hello world")
-})
 
-app.post('/v1/categories', (req: Request, res: Response) => {
-    res.send("create category")
-})
-
-app.get('/v1/categories', (req: Request, res: Response) => {
-    res.send("get all categories")
-})
-
-app.get('/v1/categories/:id', (req: Request, res: Response) => {
-    res.send("get category by id")
-})
-
-app.put('/v1/categories/:id', (req: Request, res: Response) => {
-    res.send("update category by id")
-})
-
-app.delete('/v1/categories/:id', (req: Request, res: Response) => {
-    res.send("delete category by id")
-})
-
-app.listen(port, () => {
-    console.log(`Server running at port ${port} `)
-})
-
-type  Category = {
-    id: number,
-    name: string,
-    description?: string,
-    image?: string
-    position: number,
-    parent_id?: number
-    status: CategoryStatus,
-    created_at: Date,
-    updated_at: Date,
-}
-
-enum CategoryStatus {
-    ACTIVE = "active",
-    INACTIVE = "inactive",
-    DELETED = "deleted"
-}
