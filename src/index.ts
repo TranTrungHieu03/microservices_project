@@ -2,6 +2,7 @@ import express, {Request, Response} from 'express'
 import {config} from 'dotenv'
 import {setUpCategoryHexagon, setUpCategoryModule} from "./modules/category";
 import {sequelize} from "./share/component/sequelize";
+import {setUpBrandHexagon} from "./modules/brand";
 
 config();
 
@@ -21,6 +22,7 @@ config();
         });
         
         app.use('/v1', setUpCategoryHexagon(sequelize));
+        app.use('/v1', setUpBrandHexagon(sequelize));
         
         await sequelize.sync({force: false});
         console.log('Tables in database synced successfully.');

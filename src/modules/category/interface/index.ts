@@ -14,19 +14,3 @@ export interface ICategoryUseCase {
     deleteCategory(id: string): Promise<boolean>
     
 }
-
-export interface IRepository extends IQueryRepository, ICommandRepository {
-}
-
-export interface IQueryRepository {
-    get(id: string): Promise<Category | null>;
-    
-    list(cond: CategoryCondDTO, paging: PagingDTO): Promise<Array<Category>>
-}
-
-export interface ICommandRepository {
-    insert(data: Category): Promise<boolean>;
-    update(id: string, data: CategoryUpdateDTO): Promise<boolean>
-    
-    delete(id: string, isHard?: boolean): Promise<boolean>
-}

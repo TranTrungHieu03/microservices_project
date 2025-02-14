@@ -1,4 +1,4 @@
-import {ICategoryUseCase, IRepository} from "../interface";
+import {ICategoryUseCase} from "../interface";
 import {
     CategoryCondDTO,
     CategoryCreateDTO,
@@ -12,11 +12,12 @@ import {v7} from "uuid";
 import {PagingDTO, PagingDTOSchema} from "../../../share/model/paging";
 import {ErrDataNotFound} from "../../../share/model/base-error";
 import {ZodError} from "zod";
-import {ErrCategoryNameTooShort} from "../model/error";
+import {ErrAlreadyExistCategory, ErrCategoryNameTooShort} from "../model/error";
+import {IRepository} from "../../../share/interface";
 
 export class CategoryUseCase implements ICategoryUseCase {
     
-    constructor(private readonly repository: IRepository) {
+    constructor(private readonly repository: IRepository<Category, CategoryCondDTO, CategoryUpdateDTO>) {
     }
     
     async createANewCategory(data: CategoryCreateDTO): Promise<string> {
@@ -30,6 +31,10 @@ export class CategoryUseCase implements ICategoryUseCase {
                 }
             }
             throw error
+        }
+        const existedCategory = await this.repository.findByCond({name: parseData!.name});
+        if (existedCategory) {
+            throw ErrAlreadyExistCategory
         }
         const newId = v7()
         const category: Category = {

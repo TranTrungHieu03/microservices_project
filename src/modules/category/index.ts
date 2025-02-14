@@ -4,7 +4,7 @@ import {getCategoryApi} from "./infras/get-api";
 import {createCategoryApi} from "./infras/create-api";
 import {updateCategoryApi} from "./infras/update-api";
 import {deleteCategoryApi} from "./infras/delete-api";
-import {init, modelName} from "./infras/repository/dto";
+import {init} from "./infras/repository/dto";
 import {Sequelize} from "sequelize";
 import {CategoryHttpService} from "./infras/tranport/http-service";
 import {CategoryUseCase} from "./usecase";
@@ -24,7 +24,7 @@ export const setUpCategoryModule = (sequelize: Sequelize) => {
 }
 export const setUpCategoryHexagon = (sequelize: Sequelize) => {
     init(sequelize)
-    const repository = new MySqlCategoryRepository(sequelize, modelName)
+    const repository = new MySqlCategoryRepository(sequelize)
     const useCase = new CategoryUseCase(repository)
     const httpService = new CategoryHttpService(useCase)
     const router = Router()
