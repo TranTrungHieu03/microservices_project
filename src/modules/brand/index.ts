@@ -1,19 +1,23 @@
 import {Router} from "express";
 import {MySqlBrandRepository} from "./infras/repository-sequelize";
 import {BrandHttpService} from "./infras/transport";
-import {BrandUseCase} from "./usecase";
 import {Sequelize} from "sequelize";
-import {init} from "./infras/repository-sequelize/dto";
+import {init, modelName} from "./infras/repository-sequelize/dto";
 import {CreateNewBrandCmdHandler} from "./usecase/create-new-brand";
 import {GetBrandDetailQuery} from "./usecase/get-brand-detail";
+import {UpdateBrandCmdHandler} from "./usecase/update-brand";
+import {DeleteBrandCmdHandler} from "./usecase/delete-brand";
+import {GetListBrandQueryHandler} from "./usecase/get-list-brand";
 
 export const setUpBrandHexagon = (sequelize: Sequelize) => {
     init(sequelize)
-    const repository = new MySqlBrandRepository(sequelize)
-    const useCase = new BrandUseCase(repository)
+    const repository = new MySqlBrandRepository(sequelize, modelName)
     const createCmdHandler = new CreateNewBrandCmdHandler(repository)
     const getDetailQueryHandler = new GetBrandDetailQuery(repository)
-    const httpService = new BrandHttpService(createCmdHandler, getDetailQueryHandler, useCase)
+    const updateCmdHandler = new UpdateBrandCmdHandler(repository)
+    const deleteCmdHandler = new DeleteBrandCmdHandler(repository)
+    const listBrandQueryHandler = new GetListBrandQueryHandler(repository)
+    const httpService = new BrandHttpService(createCmdHandler, getDetailQueryHandler, updateCmdHandler, deleteCmdHandler, listBrandQueryHandler)
     const router = Router()
     
     router.get('/brands', httpService.listBrandAPI.bind(httpService));

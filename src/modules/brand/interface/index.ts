@@ -20,15 +20,22 @@ export interface CreateCommand {
     data: BrandCreateDTO
 }
 
-export interface ICommandHandler<Cmd, Result> {
-    execute(command: Cmd): Promise<Result>
+export interface UpdateCommand {
+    id: string
+    data: BrandUpdateDTO
 }
 
 export interface GetDetailQuery {
     id: string
 }
-export interface IQueryHandler<Query, Result> {
-    query(query: Query): Promise<Result>
+
+export interface DeleteCommand {
+    id: string
+    isHard: boolean
+}
+export interface ListQuery {
+    cond: BrandCondDTO
+    paging: PagingDTO
 }
 
 export interface IBrandRepository extends IRepository<Brand, BrandCondDTO, BrandUpdateDTO> {

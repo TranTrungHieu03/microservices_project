@@ -1,17 +1,20 @@
 import {Request, Response} from "express";
 import {
     CreateCommand,
+    DeleteCommand,
     GetDetailQuery,
-    IBrandUseCase,
-    ICommandHandler,
-    IQueryHandler
+    ListQuery,
+    UpdateCommand,
 } from "../../interface";
 import {Brand} from "../../model/brand";
+import {ICommandHandler, IQueryHandler} from "../../../../share/interface";
 
 export class BrandHttpService {
     constructor(private readonly createCmdHandle: ICommandHandler<CreateCommand, string>,
                 private readonly getDetailCmdHandle: IQueryHandler<GetDetailQuery, Brand>,
-                private readonly useCase: IBrandUseCase) {
+                private readonly updateCmdHandle: ICommandHandler<UpdateCommand, void>,
+                private readonly deleteCmdHandle: ICommandHandler<DeleteCommand, void>,
+                private readonly getListQueryHandle: IQueryHandler<ListQuery, Array<Brand>>,) {
     }
     
     async createANewBrandAPI(req: Request, res: Response) {
@@ -41,8 +44,8 @@ export class BrandHttpService {
     async updateBrandAPI(req: Request, res: Response) {
         
         try {
-            const result = await this.useCase.updateBrand(req.params.id, req.body);
-            res.status(200).json({data: result})
+            await this.updateCmdHandle.execute({id: req.params.id, data: req.body});
+            res.status(200).json({data: true})
         } catch (err) {
             res.status(400).json({
                 message: (err as Error).message
@@ -53,7 +56,7 @@ export class BrandHttpService {
     async deleteBrandAPI(req: Request, res: Response) {
         
         try {
-            const result = await this.useCase.deleteBrand(req.params.id);
+            const result = await this.deleteCmdHandle.execute({id: req.params.id, isHard: false});
             res.status(200).json({data: result})
         } catch (err) {
             res.status(400).json({
@@ -68,7 +71,10 @@ export class BrandHttpService {
             // const limit = parseInt(req.query.limit as string);
             const paging = {page: page, limit: 100};
             
-            const result = await this.useCase.listBrand({}, paging);
+            const result = await this.getListQueryHandle.query({
+                cond: {},
+                paging
+            });
             res.status(200).json({data: result, paging});
         } catch (err) {
             res.status(400).json({
