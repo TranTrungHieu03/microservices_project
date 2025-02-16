@@ -14,12 +14,9 @@ export class UserHTTPService extends BaseHTTPService<User, UserRegistrationDTO, 
     }
     
     async login(req: Request, res: Response) {
-        try {
-            const token = await this.useCase.login(req.body);
-            res.status(200).json({data: token});
-        } catch (e) {
-            res.status(400).json({message: (e as Error).message});
-        }
+        
+        const token = await this.useCase.login(req.body);
+        res.status(200).json({data: token});
         
     }
     
@@ -43,5 +40,17 @@ export class UserHTTPService extends BaseHTTPService<User, UserRegistrationDTO, 
             res.status(400).json({message: (e as Error).message});
         }
         
+    }
+    
+    async introspectAPI(req: Request, res: Response) {
+        try {
+            const {token} = req.body;
+            const payload = await this.useCase.verifyToken(token);
+            res.status(200).json({data: payload});
+        } catch (e) {
+            res.status(400).json({
+                message: (e as Error).message
+            });
+        }
     }
 }

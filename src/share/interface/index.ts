@@ -56,8 +56,17 @@ export interface ITokenProvider {
     verify(token: string): Promise<TokenPayload | null>;
 }
 
-export interface ITokenIntrospectResult {
+export type TokenIntrospectResult = {
     payload: TokenPayload | null;
     error?: Error,
     isOk: boolean
+}
+
+export interface ITokenIntrospect {
+    introspect(token: string): Promise<TokenIntrospectResult>
+}
+
+export type UserToken = {
+    accessToken: string;
+    refreshToken: string;
 }

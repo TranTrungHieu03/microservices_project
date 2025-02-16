@@ -16,6 +16,7 @@ import {PagingDTO} from "../../../share/model/paging";
 import {v7} from "uuid";
 import {
     ErrEmailAndPassword,
+    ErrInvalidToken,
     ErrUserEmailDuplicate,
     ErrUserInActivated,
     ErrUserNotFound,
@@ -23,6 +24,7 @@ import {
 } from "../model/error";
 import bcrypt from "bcrypt";
 import {jwtProvider} from "../../../share/component/jwt";
+import {AppError} from "../../../share/app-error";
 
 export class UserUseCase implements IUserUseCase {
     constructor(private readonly repository: IRepository<User, UserCondDTO, UserUpdateDTO>) {
@@ -51,14 +53,14 @@ export class UserUseCase implements IUserUseCase {
         const user = await this.repository.findByCond({email: dto.email})
         
         if (!user) {
-            throw ErrEmailAndPassword
+            throw AppError.from(ErrEmailAndPassword).withLogMessage(`Email: ${dto.email} not found`)
         }
         const isMatch = await bcrypt.compare(`${dto.password}.${user.salt}`, user.password)
         if (!isMatch) {
-            throw ErrUserPasswordNotMatch
+            throw AppError.from(ErrUserPasswordNotMatch).withLogMessage(`Password not match`)
         }
         if (user.status === Status.DELETED || user.status === Status.INACTIVE) {
-            throw ErrUserInActivated
+            throw AppError.from(ErrUserInActivated).withLogMessage(`User is not active`)
         }
         
         return jwtProvider.generate({sub: user.id, role: user.role})
@@ -96,7 +98,20 @@ export class UserUseCase implements IUserUseCase {
     }
     
     async verifyToken(token: string): Promise<TokenPayload> {
-        throw new Error("Method not implemented.");
+        const payload = await jwtProvider.verify(token);
+        if (!payload) {
+            throw ErrInvalidToken
+        }
+        const user = await this.repository.get(payload.sub);
+        if (!user) {
+            throw ErrUserNotFound
+        }
+        
+        if (user.status === Status.DELETED || user.status === Status.INACTIVE
+            || user.status === Status.BANNED) {
+            throw ErrUserInActivated
+        }
+        return {sub: user.id, role: user.role}
     }
     
     async profile(userId: string): Promise<User> {

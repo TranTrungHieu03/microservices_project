@@ -17,3 +17,4 @@ export const ErrPasswordAtLeast6Chars = new Error("Password at least 6 character
 export const ErrEmailAndPassword = new Error("Email and password")
 
 export const ErrUserInActivated = new Error("User is inactivated");
+export const ErrInvalidToken = new Error("Invalid token");

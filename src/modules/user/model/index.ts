@@ -31,10 +31,10 @@ export enum Status {
 export const userSchema = z.object({
     id: z.string().uuid(),
     avatar: z.string().nullable().optional(),
-    firstName: z.string().min(2, ErrFirstNameAtLeast2Chars),
-    lastName: z.string().min(2, ErrLastNameAtLeast2Chars),
-    email: z.string().email(ErrEmailInvalid),
-    password: z.string().min(6, ErrPasswordAtLeast6Chars),
+    firstName: z.string().min(2, ErrFirstNameAtLeast2Chars.message),
+    lastName: z.string().min(2, ErrLastNameAtLeast2Chars.message),
+    email: z.string().email(ErrEmailInvalid.message),
+    password: z.string().min(6, ErrPasswordAtLeast6Chars.message),
     salt: z.string().min(8),
     phone: z.string().nullable().optional(),
     birthDate: z.date({
@@ -58,8 +58,8 @@ export const UserRegistrationDTOSchema = userSchema.pick({
 })
 
 export const UserLoginDTOSchema = z.object({
-    email: z.string().email(ErrEmailInvalid),
-    password: z.string().min(6, ErrPasswordAtLeast6Chars)
+    email: z.string().email(ErrEmailInvalid.message),
+    password: z.string().min(6, ErrPasswordAtLeast6Chars.message)
 });
 
 export  type UserRegistrationDTO = z.infer<typeof UserRegistrationDTOSchema>
